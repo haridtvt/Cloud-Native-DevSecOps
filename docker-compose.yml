@@ -1,0 +1,31 @@
+version: '3.8'
+services:
+  app_db:
+    image: mysql:8.0
+    container_name: app_db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: 'shopdata'
+    volumes:
+      - ./shop-app/database.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "3306:3306"
+    networks:
+      - app_network
+  app_core:
+    image: ${DOCKER_USER}:{TAG:-latest}       # input from jenkinsfile
+    container_name: app_core
+    environment:
+      - DB_HOST=app_db
+      - DB_USER=root
+      - DB_PASSWORD=Foobar@123
+      - DB_NAME=shopdata
+    depends_on:
+      - app_db
+    ports:
+      - "5000:5000"
+    networks:
+      - app_network
+networks:
+  app_network:
+    driver: bridge
