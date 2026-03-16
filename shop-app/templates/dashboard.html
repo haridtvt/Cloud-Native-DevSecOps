@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard - Shop App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-blue-600 p-4 text-white flex justify-between">
+        <h1 class="text-xl font-bold">DevSecOps Shop</h1>
+        <a href="/logout" class="hover:underline">Logout</a>
+    </nav>
+
+    <div class="container mx-auto mt-10 p-5">
+        <h2 class="text-2xl mb-6 font-semibold">Sản phẩm nổi bật</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {% for p in products %}
+            <div class="bg-white p-4 rounded-lg shadow">
+                <img src="{{ p.img }}" class="w-full h-32 object-cover mb-4">
+                <h3 class="font-bold">{{ p.name }}</h3>
+                <p class="text-blue-600">${{ p.price }}</p>
+                <div class="flex items-center mt-4 space-x-2">
+                    <button class="bg-gray-200 px-2 rounded">-</button>
+                    <span id="qty-{{p.id}}">0</span>
+                    <button class="bg-gray-200 px-2 rounded">+</button>
+                </div>
+                <button onclick="location.href='/checkout'" class="w-full mt-4 bg-green-500 text-white py-2 rounded hover:bg-green-600">Mua ngay</button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
