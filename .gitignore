@@ -1,0 +1,11 @@
+IaC/.terraform/
+IaC/intrucstion
+IaC/.terraform.lock.hcl
+IaC/.terraform.tfstate.lock.info
+IaC/terraform.tfstate
+IaC/terraform.tfstate.backup
+IaC/terraform.tfvars
+IaC/outputs.json
+.idea/
+terraform.tfstate
+.terraform.tfstate.lock.info
