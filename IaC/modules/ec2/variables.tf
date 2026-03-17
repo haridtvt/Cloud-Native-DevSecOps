@@ -1,0 +1,11 @@
+variable "ami_id" {}
+variable "public_key" {}
+variable "subnet_id" {}
+variable "sg_jens_id" {}
+variable "sg_app_id" {}
+variable "sg_sec_id" {}
+variable "sg_mor_id" {}
+variable "eip_jens_id" {}
+variable "eip_app_id" {}
+variable "eip_sec_id" {}
+variable "eip_mor_id" {}
