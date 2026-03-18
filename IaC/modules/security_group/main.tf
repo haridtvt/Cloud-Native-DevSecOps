@@ -137,6 +137,17 @@ resource "aws_security_group_rule" "INGRESS443" {
   description = "Allow port 443"
 }
 
+resource "aws_security_group_rule" "INGRESS9100" {
+  for_each = local.target_sg_ids
+  from_port         = 9100
+  protocol          = "tcp"
+  security_group_id = each.value
+  to_port           = 9100
+  type              = "ingress"
+  cidr_blocks = ["0.0.0.0/0"]
+  description = "Allow port 9100 for node exporter"
+}
+
 
 resource "aws_security_group_rule" "ec2_egress_internet" {
   type = "egress"
