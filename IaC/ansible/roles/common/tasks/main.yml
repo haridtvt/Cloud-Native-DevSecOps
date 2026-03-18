@@ -1,0 +1,55 @@
+---
+- name: Update package
+  become: true
+  dnf:
+    name: "*"
+    state: latest
+    update_only: yes
+
+- name: Install package details
+  become: true
+  dnf:
+    name:
+      - java-17-amazon-corretto
+      - htop
+      - git
+      - tar
+      - wget
+    state: present
+
+- name: Install Docker
+  become: true
+  dnf:
+    name: docker
+    state: present
+
+- name: Start and Enable Docker
+  become: true
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Install Docker Compose
+  become: true
+  get_url:
+    url: https://github.com/docker/compose/releases/download/v5.0.1/docker-compose-linux-x86_64
+    dest: /usr/local/bin/docker-compose
+    mode: '0755'
+
+- name: Adding ec2-user to docker group
+  become: true
+  user:
+    name: ec2-user
+    groups: docker
+    append: yes
+
+- name: Check docker status
+  become: true
+  systemd:
+    name: docker
+  register: docker_status
+
+- name: Show docker service status
+  debug:
+    msg: "Docker service status: {{ docker_status.status.ActiveState }}"

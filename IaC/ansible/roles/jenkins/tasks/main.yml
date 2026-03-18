@@ -1,0 +1,44 @@
+---
+- name: Adding jenkin repo
+  become: true
+  get_url:
+    url: https://pkg.jenkins.io/redhat-stable/jenkins.rep
+    dest: /etc/yum.repos.d/jenkins.repo
+
+- name: Import Jenkins key
+  become: true
+  rpm_key:
+    key: https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+    state: present
+
+- name: Install Jenkins
+  dnf:
+    name: jenkins
+    state: present
+  become: true
+
+- name: Start and enable Jenkins
+  systemd:
+    name: jenkins
+    state: started
+    enabled: true
+  become: true
+
+- name: Open port 8080
+  firewalld:
+    port: 8080/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes
+  become: true
+  ignore_errors: true
+
+- name: Check Jenkins status
+  become: true
+  systemd:
+    name: jenkins
+  register: Jenkins_status
+
+- name: Show Jenkins service status
+  debug:
+    msg: "Jenkins service status: {{ Jenkins_status.status.ActiveState }}"

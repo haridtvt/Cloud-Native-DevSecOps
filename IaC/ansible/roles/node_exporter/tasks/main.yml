@@ -1,0 +1,59 @@
+---
+- name: Create node_exporter user
+  become: true
+  user:
+    name: node_exporter
+    system: yes
+    shell: /sbin/nologin
+    create_home: no
+
+- name: Download Node exporter
+  become: true
+  get_url:
+    url: https://github.com/prometheus/node_exporter/releases/download/v1.10.2/node_exporter-1.10.2.linux-amd64.tar.gz
+    dest: /tmp/node_exporter.tar.gz
+
+- name: Extract node_exporter
+  become: true
+  unarchive:
+    src: /tmp/node_exporter.tar.gz
+    dest: /tmp/
+    remote_src: yes
+
+- name: Copy node_exporter binary
+  become: true
+  copy:
+    src: /tmp/node_exporter-1.10.2.linux-amd64/node_exporter
+    dest: /usr/local/bin/
+    remote_src: true
+    mode: '0755'
+
+- name: Create systemd file
+  become: true
+  template:
+    src: node_exporter.service.j2
+    dest: /etc/systemd/system/node_exporter.service
+    mode: '0644'
+
+- name: Reload systemd
+  become: true
+  systemd:
+    daemon_reload: yes
+
+- name: Start node_exporter
+  become: true
+  systemd:
+    name: node_exporter
+    state: started
+    enabled: yes
+
+- name: Check node_exporter status
+  become: true
+  systemd:
+    name: node_exporter
+  register: node_exporter_status
+
+- name: Show service status
+  debug:
+    msg: "Service status: {{ node_exporter_status.status.ActiveState }}"
+

@@ -1,0 +1,28 @@
+---
+- hosts: all
+  become: yes
+  roles:
+    - common
+  tags: common
+
+- hosts: monitor
+  become: yes
+  roles:
+    - monitor
+
+- hosts: node_exporter
+  become: yes
+  roles:
+    - node_exporter
+
+- hosts: jenkins
+  become: yes
+  roles:
+    - jenkins
+
+- hosts: app
+  become: yes
+  roles:
+    - appserver
+
+
