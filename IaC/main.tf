@@ -24,3 +24,26 @@ module "ec2_instance" {
   eip_mor_id = module.vpc.monitor_id
   eip_sec_id = module.vpc.security_id
 }
+
+resource "local_file" "ansible_inventory" {
+  content  = <<EOT
+[jenkins]
+jenkins_server ansible_host=${module.vpc.jenkins_ip}
+
+[app]
+app_server ansible_host=${module.vpc.appserver_ip}
+
+[monitor]
+monitor_server ansible_host=${module.vpc.monitor_ip}
+
+[security]
+security_server ansible_host=${module.vpc.security_ip}
+
+[all:vars]
+ansible_user=ec2-user
+ansible_ssh_private_key_file=../IaC/DevSecOps.pem
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+ansible_python_interpreter=/usr/bin/python3
+EOT
+  filename = "./ansible/inventory.ini"
+}
