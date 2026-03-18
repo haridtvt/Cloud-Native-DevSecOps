@@ -41,7 +41,7 @@ security_server ansible_host=${module.vpc.security_ip}
 
 [all:vars]
 ansible_user=ec2-user
-ansible_ssh_private_key_file=../IaC/DevSecOps.pem
+ansible_ssh_private_key_file=~/DevSecOps.pem
 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 ansible_python_interpreter=/usr/bin/python3
 EOT
