@@ -1,17 +1,17 @@
 output "jenkins_ip" {
-  value       = aws_eip.JENS.address
+  value       = aws_eip.JENS.public_ip
 }
 
 output "monitor_ip" {
-  value       = aws_eip.MOR.address
+  value       = aws_eip.MOR.public_ip
 }
 
 output "security_ip" {
-  value       = aws_eip.SEC.address
+  value       = aws_eip.SEC.public_ip
 }
 
 output "appserver_ip" {
-  value       = aws_eip.APP.address
+  value       = aws_eip.APP.public_ip
 }
 
 output "jenkins_id" {
