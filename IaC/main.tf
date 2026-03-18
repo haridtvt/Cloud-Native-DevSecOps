@@ -39,6 +39,11 @@ monitor_server ansible_host=${module.vpc.monitor_ip}
 [security]
 security_server ansible_host=${module.vpc.security_ip}
 
+[node_exporter]
+jenkins_server
+app_server
+security_server
+
 [all:vars]
 ansible_user=ec2-user
 ansible_ssh_private_key_file=~/DevSecOps.pem
