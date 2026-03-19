@@ -66,13 +66,6 @@
     dest: /etc/prometheus/
     remote_src: true
 
-- name: Copy console_libraries
-  become: true
-  copy:
-    src: /tmp/prometheus-3.10.0.linux-amd64/console_libraries
-    dest: /etc/prometheus/
-    remote_src: true
-
 - name: Copy prometheus config
   become: true
   copy:
