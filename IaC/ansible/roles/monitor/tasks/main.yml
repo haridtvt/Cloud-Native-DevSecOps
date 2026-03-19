@@ -59,19 +59,12 @@
     remote_src: true
     mode: '0755'
 
-- name: Copy consoles
-  become: true
-  copy:
-    src: /tmp/prometheus-3.10.0.linux-amd64/consoles
-    dest: /etc/prometheus/
-    remote_src: true
-
 - name: Copy prometheus config
   become: true
-  copy:
-    src: /tmp/prometheus-3.10.0.linux-amd64/prometheus.yml
-    dest: /etc/prometheus/
-    remote_src: true
+  template:
+    src: prometheus.yml.j2
+    dest: /etc/prometheus/prometheus.yml
+    mode: '0644'
 
 - name: Create systemd file
   become: true
@@ -80,10 +73,46 @@
     dest: /etc/systemd/system/prometheus.service
     mode: '0644'
 
+#TO DO: auto config prometheus for all node
+
+######## GRAFANA ##########
+
+- name: Create repo folder
+  become: true
+  file:
+    path: /etc/yum.repos.d/
+    state: directory
+    mode: '0755'
+
+- name: Create repo grafana
+  become: true
+  template:
+    src: grafana.repo.j2
+    dest: /etc/yum.repos.d/grafana.repo
+
+- name: Update repo
+  become: true
+  dnf:
+    name: "*"
+    state: latest
+    update_only: yes
+
+- name: Install grafana
+  become: true
+  dnf:
+    name: grafana
+
 - name: Reload systemd
   become: true
   systemd:
     daemon_reload: yes
+
+- name: Start service grafana
+  become: true
+  systemd:
+    name: grafana-server
+    state: started
+    enabled: yes
 
 - name: Start Prometheus
   become: true
@@ -97,6 +126,16 @@
   systemd:
     name: prometheus
   register: Prometheus_status
+
+- name: Check grafana status
+  become: true
+  systemd:
+    name: grafana-server
+  register: Grafana_status
+
+- name: Show grafana status
+  debug:
+    msg: "Grafana service status: {{ Grafana_status.status.ActiveState }}"
 
 - name: Show Prometheus service status
   debug:

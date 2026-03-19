@@ -15,6 +15,7 @@
       - git
       - tar
       - wget
+      - ca-certificates
     state: present
 
 - name: Install Docker

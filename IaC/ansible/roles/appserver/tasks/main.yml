@@ -7,11 +7,11 @@
     group: docker
     mode: '0755'
 
-- name: Open port 5000
-  firewalld:
-    port: 5000/tcp
-    permanent: yes
-    state: enabled
-    immediate: yes
-  become: true
-  ignore_errors: true
+#- name: Open port 5000
+#  firewalld:
+#    port: 5000/tcp
+#    permanent: yes
+#    state: enabled
+#    immediate: yes
+#  become: true
+#  ignore_errors: true

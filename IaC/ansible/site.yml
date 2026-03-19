@@ -9,20 +9,29 @@
   become: yes
   roles:
     - monitor
+  tags: monitor
 
 - hosts: node_exporter
   become: yes
   roles:
     - node_exporter
+  tags: node_exporter
 
 - hosts: jenkins
   become: yes
   roles:
     - jenkins
+  tags: jenkins
 
 - hosts: app
   become: yes
   roles:
     - appserver
+  tags: app
 
+- hosts: security
+  become: yes
+  roles:
+    - security
+  tags: security
 
