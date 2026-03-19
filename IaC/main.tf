@@ -25,6 +25,10 @@ module "ec2_instance" {
   eip_sec_id = module.vpc.security_id
 }
 
+module "s3" {
+  source = "./modules/s3"
+}
+
 resource "local_file" "ansible_inventory" {
   content  = <<EOT
 [jenkins]
@@ -49,6 +53,10 @@ ansible_user=ec2-user
 ansible_ssh_private_key_file=~/DevSecOps.pem
 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 ansible_python_interpreter=/usr/bin/python3
+jenkins_ip=${module.vpc.jenkins_ip}
+appserver_ip=${module.vpc.appserver_ip}
+monitor_ip=${module.vpc.monitor_ip}
+security_ip=${module.vpc.security_ip}
 EOT
   filename = "./ansible/inventory.ini"
 }

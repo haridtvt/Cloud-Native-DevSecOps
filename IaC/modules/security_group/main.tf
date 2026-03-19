@@ -34,6 +34,17 @@ resource "aws_security_group" "SGMOR" {
   }
 }
 
+resource "aws_security_group_rule" "INGRESS9000" {
+  from_port         = 9000
+  protocol          = "tcp"
+  security_group_id = aws_security_group.SGSEC.id
+  to_port           = 9000
+  type              = "ingress"
+  cidr_blocks = ["0.0.0.0/0"]
+  description = "Allow port 9000 for Sonarqube GUI"
+}
+
+
 resource "aws_security_group_rule" "INGRESS8080" {
   from_port         = 8080
   protocol          = "tcp"
@@ -84,6 +95,8 @@ resource "aws_security_group_rule" "INGRESS3000" {
   cidr_blocks = ["0.0.0.0/0"]
   description = "Allow port 3000 for dashboard grafana"
 }
+
+
 
 resource "aws_security_group_rule" "INGRESS9090" {
   from_port         = 9090
