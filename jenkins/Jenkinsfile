@@ -1,0 +1,69 @@
+//pipeline {
+//    agent none
+//    environment {
+//        BUID_TAG='v${BUILD_NUMBER}'
+//        DOCKER_USER='haridtvt'
+//
+//    }
+//    stages {
+//        stage('Check out') {
+//            agent {
+//                label 'security_node || jenkins_node'
+//            }
+//            steps {
+//                checkout scm
+//            }
+//        }
+//        stage('Scan code sonarqube') {
+//            agent { label 'security_node' }
+//            steps {
+//                sh 'snyk scan'
+//                sh 'sonarque scan'
+//                // check acceptance condition
+//                // push report to S3
+//            }
+//        }
+//        state('Build and Images scan') {
+//            agent { label 'security_node' }
+//            steps {
+//                script {
+//                    withCredentials([usernamePassword(credentialsId: '', usernameVariable: 'DOCKER_UNAME', passwordVariable: 'DOCKER_PASS')]) {
+//                        sh "echo ${DOCKER_PASS}"
+//                        sh "docker build -t ${DOCKER_USER}/application:${BUID_TAG} ./shop-app/ "
+//                        // check trivy scan
+//                        // acceptance condition
+//                        // push report s3
+//                        // cleanup
+//                    }
+//                }
+//            }
+//        }
+//        stage('Deploy') {
+//            agent {
+//                label 'application_node'
+//            }
+//            steps {
+//                sh 'docker pull ${DOCKER_USER}/application:${BUID_TAG}'
+//                sh 'docker-compose up -d'
+//            }
+//        }
+//        post {
+//            success {
+//                echo 'SUCCESS: Backend deployed successfully.'
+//            }
+//            failure {
+//                echo 'FAILURE: Deployment failed. Please check the logs.'
+//            }
+//        }
+//    }
+//}
+pipeline {
+    agent any
+    stages {
+        stage('test') {
+            steps {
+                echo 'Check git pull'
+            }
+        }
+    }
+}

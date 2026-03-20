@@ -58,5 +58,5 @@ appserver_ip=${module.vpc.appserver_ip}
 monitor_ip=${module.vpc.monitor_ip}
 security_ip=${module.vpc.security_ip}
 EOT
-  filename = "./ansible/inventory.ini"
+  filename = "../ansible/inventory.ini"
 }
