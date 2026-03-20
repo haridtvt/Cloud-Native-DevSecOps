@@ -6,6 +6,10 @@ IaC/terraform.tfstate
 IaC/terraform.tfstate.backup
 IaC/terraform.tfvars
 IaC/outputs.json
+IaC/terraform_output.json
+Iac/ansible/ansible.cfg
+Iac/ansible/ansible.log
+Iac/ansible/inventory.ini
 .idea/
 terraform.tfstate
 .terraform.tfstate.lock.info
