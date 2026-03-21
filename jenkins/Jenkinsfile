@@ -26,13 +26,16 @@ pipeline {
                 sh 'snyk iac test --json | snyk-to-html -o report-iac.html || true'
                 sh 'aws s3 cp report-code.html ${S3_URL}'
                 sh 'aws s3 cp report-iac.html ${S3_URL}'
+                sh 'rm -rf report-code.html report-iac.html'
                 sh """
-                    sonar-scanner \
-                      -Dsonar.projectKey=my-devsecops-project \
-                      -Dsonar.sources=. \
-                      -Dsonar.host.url=${SONAR_URL} \
-                      -Dsonar.login=${SONAR_AUTH_TOKEN} \
-                      -Dsonar.working.directory=/tmp/.scannerwork
+                    docker run --rm \
+                        --network host \
+                        -e SONAR_HOST_URL="${SONAR_URL}" \
+                        -e SONAR_TOKEN="${SONAR_AUTH_TOKEN}" \
+                        -v "${WORKSPACE}:/usr/src" \
+                        sonarsource/sonar-scanner-cli \
+                        -Dsonar.projectKey=my-devsecops-project \
+                        -Dsonar.sources=.
                 """
             }
         }
