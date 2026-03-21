@@ -1,62 +1,64 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask_bcrypt import Bcrypt
 import pymysql
 import os
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'devsecops-very-secret')
+bcrypt = Bcrypt(app)
 
-# DB enviroment ( set in Docker-compose/K8s)
-DB_HOST = os.environ.get('DB_HOST', 'localhost')
-DB_USER = os.environ.get('DB_USER', 'root')
-DB_PASS = os.environ.get('DB_PASSWORD', 'password')
-DB_NAME = os.environ.get('DB_NAME', 'shopdata')
+DB_CONFIG = {
+    'host': os.environ.get('DB_HOST', 'localhost'),
+    'user': os.environ.get('DB_USER', 'root'),
+    'password': os.environ.get('DB_PASSWORD', 'password'),
+    'database': os.environ.get('DB_NAME', 'shop_db'),
+    'cursorclass': pymysql.cursors.DictCursor
+}
+
 
 def get_db_connection():
-    return pymysql.connect(
-        host=DB_HOST,
-        user=DB_USER,
-        password=DB_PASS,
-        database=DB_NAME,
-        cursorclass=pymysql.cursors.DictCursor
-    )
-
-PRODUCTS = [
-    {"id": 1, "name": "Laptop Dell XPS", "price": 1500, "img": "https://via.placeholder.com/150"},
-    {"id": 2, "name": "iPhone 15 Pro", "price": 1200, "img": "https://via.placeholder.com/150"},
-    {"id": 3, "name": "Mechanical Keyboard", "price": 100, "img": "https://via.placeholder.com/150"},
-    {"id": 4, "name": "Sony WH-1000XM5", "price": 350, "img": "https://via.placeholder.com/150"},
-]
-
-@app.route('/')
-def index():
-    return redirect(url_for('login'))
+    return pymysql.connect(**DB_CONFIG)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        session['user'] = request.form['username']
-        return redirect(url_for('dashboard'))
+        username = request.form['username']
+        password = request.form['password']
+
+        conn = get_db_connection()
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+            user = cursor.fetchone()
+        conn.close()
+
+        if user and bcrypt.check_password_hash(user['password'], password):
+            session['user'] = user['username']
+            return redirect(url_for('dashboard'))
+        else:
+            flash('Invalid password or username!', 'danger')
+
     return render_template('login.html')
 
 @app.route('/dashboard')
 def dashboard():
     if 'user' not in session: return redirect(url_for('login'))
-    return render_template('dashboard.html', products=PRODUCTS)
 
-@app.route('/checkout', methods=['GET', 'POST'])
-def checkout():
-    if request.method == 'POST':
-        return redirect(url_for('success'))
-    return render_template('checkout.html')
+    conn = get_db_connection()
+    with conn.cursor() as cursor:
+        cursor.execute("SELECT * FROM products")
+        db_products = cursor.fetchall()
+    conn.close()
 
-@app.route('/success')
-def success():
-    return render_template('success.html')
+    return render_template('dashboard.html', products=db_products)
 
-@app.route('/logout')
-def logout():
-    session.pop('user', None)
-    return redirect(url_for('login'))
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+@app.route('/api/buy/<int:product_id>', methods=['POST'])
+def buy_product(product_id):
+    if 'user' not in session: return jsonify({"error": "Unauthorized"}), 401
+
+    conn = get_db_connection()
+    with conn.cursor() as cursor:
+        cursor.execute("UPDATE products SET stock = stock - 1 WHERE id = %s AND stock > 0", (product_id,))
+        conn.commit()
+    conn.close()
+    return redirect(url_for('success'))
