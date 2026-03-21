@@ -42,13 +42,14 @@ pipeline {
         stage('Build and Images scan') {
             agent { label 'Security_node' }
             environment {
+                DOCKER_USER='haridtvt'
                 IMAGE_NAME="${DOCKER_USER}/application:${BUID_TAG}"
             }
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'Docker_credentials', usernameVariable: 'DOCKER_UNAME', passwordVariable: 'DOCKER_PASS')]) {
                         sh "echo ${DOCKER_PASS} | docker login -u $DOCKER_UNAME --password-stdin"
-                        sh "docker build -t ${IMAGE_NAME} ./shop-app/ "
+                        sh "docker build -t ${IMAGE_NAME} . "
                         sh "trivy image --format template --template '@/usr/local/share/trivy/templates/html.tpl' -o report-image.html ${IMAGE_NAME} || true"
                         sh 'aws s3 cp report-image.html ${S3_URL}'
                         sh 'docker push ${IMAGE_NAME}'
