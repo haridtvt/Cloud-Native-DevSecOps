@@ -46,7 +46,7 @@ pipeline {
             }
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: '', usernameVariable: 'DOCKER_UNAME', passwordVariable: 'DOCKER_PASS')]) {
+                    withCredentials([usernamePassword(credentialsId: 'Docker_credentials', usernameVariable: 'DOCKER_UNAME', passwordVariable: 'DOCKER_PASS')]) {
                         sh "echo ${DOCKER_PASS} | docker login -u $DOCKER_UNAME --password-stdin"
                         sh "docker build -t ${IMAGE_NAME} ./shop-app/ "
                         sh "trivy image --format template --template '@/usr/local/share/trivy/templates/html.tpl' -o report-image.html ${IMAGE_NAME} || true"

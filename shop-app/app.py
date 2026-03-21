@@ -5,7 +5,7 @@ import os
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'devsecops-very-secret')
 
-# Lấy thông tin DB từ biến môi trường (DevSecOps sẽ set trong Docker-compose/K8s)
+# DB enviroment ( set in Docker-compose/K8s)
 DB_HOST = os.environ.get('DB_HOST', 'localhost')
 DB_USER = os.environ.get('DB_USER', 'root')
 DB_PASS = os.environ.get('DB_PASSWORD', 'password')
@@ -34,7 +34,6 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        # Demo: Đăng nhập thành công với bất kỳ user nào
         session['user'] = request.form['username']
         return redirect(url_for('dashboard'))
     return render_template('login.html')
@@ -60,5 +59,4 @@ def logout():
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
-    # Quan trọng: Port 5000 cho Docker
     app.run(host='0.0.0.0', port=5000)

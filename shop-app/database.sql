@@ -8,5 +8,4 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(100)
 );
 
--- Thêm một user mẫu
 INSERT INTO users (username, password, email) VALUES ('admin', 'admin123', 'admin@example.com');
