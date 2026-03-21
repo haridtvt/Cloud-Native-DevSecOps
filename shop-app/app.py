@@ -19,6 +19,20 @@ DB_CONFIG = {
 def get_db_connection():
     return pymysql.connect(**DB_CONFIG)
 
+@app.before_request
+def require_login():
+    allowed_routes = ['login', 'register', 'static']
+
+    if 'user' not in session and request.endpoint not in allowed_routes:
+        return redirect(url_for('login'))
+
+
+@app.route('/')
+def index():
+    if 'user' in session:
+        return redirect(url_for('dashboard'))
+    return redirect(url_for('login'))
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
