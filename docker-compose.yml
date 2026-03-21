@@ -13,7 +13,7 @@ services:
     networks:
       - app_network
   app_core:
-    image: ${DOCKER_USER}:application:${BUID_TAG}
+    image: ${DOCKER_USER}/application:${BUID_TAG}
     container_name: app_core
     environment:
       - DB_HOST=app_db
