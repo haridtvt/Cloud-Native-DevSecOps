@@ -39,21 +39,25 @@ pipeline {
                 """
             }
         }
-//        state('Build and Images scan') {
-//            agent { label 'security_node' }
-//            steps {
-//                script {
-//                    withCredentials([usernamePassword(credentialsId: '', usernameVariable: 'DOCKER_UNAME', passwordVariable: 'DOCKER_PASS')]) {
-//                        sh "echo ${DOCKER_PASS}"
-//                        sh "docker build -t ${DOCKER_USER}/application:${BUID_TAG} ./shop-app/ "
-//                        // check trivy scan
-//                        // acceptance condition
-//                        // push report s3
-//                        // cleanup
-//                    }
-//                }
-//            }
-//        }
+        stage('Build and Images scan') {
+            agent { label 'Security_node' }
+            environment {
+                IMAGE_NAME="${DOCKER_USER}/application:${BUID_TAG}"
+            }
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: '', usernameVariable: 'DOCKER_UNAME', passwordVariable: 'DOCKER_PASS')]) {
+                        sh "echo ${DOCKER_PASS} | docker login -u $DOCKER_UNAME --password-stdin"
+                        sh "docker build -t ${IMAGE_NAME} ./shop-app/ "
+                        sh "trivy image --format template --template '@/usr/local/share/trivy/templates/html.tpl' -o report-image.html ${IMAGE_NAME} || true"
+                        sh 'aws s3 cp report-image.html ${S3_URL}'
+                        sh 'docker push ${IMAGE_NAME}'
+                        sh 'docker rmi ${IMAGE_NAME}'
+                        sh 'rm -rf report-image.html'
+                    }
+                }
+            }
+        }
 //        stage('Deploy') {
 //            agent {
 //                label 'application_node'
