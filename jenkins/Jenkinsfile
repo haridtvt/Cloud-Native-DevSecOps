@@ -4,6 +4,7 @@ pipeline {
         BUID_TAG="v${BUILD_NUMBER}"
         S3_URL = "s3://devsecops-reports-haridtvt/${JOB_NAME}/${BUILD_TAG}/"
         DOCKER_USER='haridtvt'
+        DB_PASSWORD = credentials('db-password-id')
     }
     stages {
         stage('Check out') {
@@ -50,7 +51,7 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'Docker_credentials', usernameVariable: 'DOCKER_UNAME', passwordVariable: 'DOCKER_PASS')]) {
                         sh "echo ${DOCKER_PASS} | docker login -u $DOCKER_UNAME --password-stdin"
                         sh "docker build -t ${IMAGE_NAME} . "
-                        sh "trivy image --format template --template '@/home/ec2-user/templates/html.tpl' -o report-image.html ${IMAGE_NAME} || true"
+                        sh "trivy image --format template --template '@/home/ec2-user/html.tpl' -o report-image.html ${IMAGE_NAME} || true"
                         sh 'aws s3 cp report-image.html ${S3_URL}'
                         sh 'docker push ${IMAGE_NAME}'
                         sh 'docker rmi ${IMAGE_NAME}'
@@ -64,6 +65,7 @@ pipeline {
                 label 'Application_node'
             }
             steps {
+                sh 'export DB_PASSWORD=${DB_PASSWORD}'
                 sh 'export DOCKER_USER=${DOCKER_USER}'
                 sh 'docker pull ${DOCKER_USER}/application:${BUID_TAG}'
                 sh 'docker-compose up -d'
