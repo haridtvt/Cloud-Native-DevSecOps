@@ -18,7 +18,6 @@ pipeline {
         stage('Scan code with snyk and sonarqube') {
             agent { label 'Security_node' }
             environment {
-                // Lấy token từ Jenkins Credentials
                 SONAR_AUTH_TOKEN = credentials('Sonarqube_token')
                 SNYK_TOKEN = credentials('Snyk_credentials')
                 SONAR_URL = "http://localhost:9000"
