@@ -13,7 +13,7 @@ services:
     networks:
       - app_network
   app_core:
-    image: ${DOCKER_USER}:{TAG:-latest}       # input from jenkinsfile
+    image: ${DOCKER_USER}:application
     container_name: app_core
     environment:
       - DB_HOST=app_db
