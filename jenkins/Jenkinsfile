@@ -78,4 +78,12 @@ pipeline {
             }
         }
     }
+    post {
+        success {
+        echo 'SUCCESS: Deployed successfully.'
+        }
+        failure {
+        echo 'FAILURE: Deployment failed. Please check the logs.'
+        }
+    }
 }
