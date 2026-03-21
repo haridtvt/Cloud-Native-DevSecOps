@@ -1,28 +1,41 @@
-//pipeline {
-//    agent none
-//    environment {
-//        BUID_TAG='v${BUILD_NUMBER}'
-//        DOCKER_USER='haridtvt'
-//
-//    }
-//    stages {
-//        stage('Check out') {
-//            agent {
-//                label 'security_node || jenkins_node'
-//            }
-//            steps {
-//                checkout scm
-//            }
-//        }
-//        stage('Scan code sonarqube') {
-//            agent { label 'security_node' }
-//            steps {
-//                sh 'snyk scan'
-//                sh 'sonarque scan'
-//                // check acceptance condition
-//                // push report to S3
-//            }
-//        }
+pipeline {
+    agent none
+    environment {
+        BUID_TAG="v${BUILD_NUMBER}"
+        S3_URL = "s3://devsecops-reports-haridtvt/${JOB_NAME}/${BUILD_TAG}/"
+    }
+    stages {
+        stage('Check out') {
+            agent {
+                label 'Security_node || Jenkins_node || Application_node'
+            }
+            steps {
+                checkout scm
+            }
+        }
+        stage('Scan code with snyk and sonarqube') {
+            agent { label 'Security_node' }
+            environment {
+                // Lấy token từ Jenkins Credentials
+                SONAR_AUTH_TOKEN = credentials('Sonarqube_token')
+                SNYK_TOKEN = credentials('Snyk_credentials')
+                SONAR_URL = "http://localhost:9000"
+            }
+            steps {
+                sh 'snyk code test --json | snyk-to-html -o report-code.html || true'
+                sh 'snyk iac test --json | snyk-to-html -o report-iac.html || true'
+                sh 'aws s3 cp ${BUID_TAG}-report-code.html ${S3_URL}'
+                sh 'aws s3 cp ${BUID_TAG}-report-iac.html ${S3_URL}'
+                sh """
+                    sonar-scanner \
+                      -Dsonar.projectKey=my-devsecops-project \
+                      -Dsonar.sources=. \
+                      -Dsonar.host.url=${SONAR_URL} \
+                      -Dsonar.login=${SONAR_AUTH_TOKEN} \
+                      -Dsonar.working.directory=/tmp/.scannerwork
+                """
+            }
+        }
 //        state('Build and Images scan') {
 //            agent { label 'security_node' }
 //            steps {
@@ -55,15 +68,5 @@
 //                echo 'FAILURE: Deployment failed. Please check the logs.'
 //            }
 //        }
-//    }
-//}
-pipeline {
-    agent any
-    stages {
-        stage('test') {
-            steps {
-                echo 'Check git pull'
-            }
-        }
     }
 }
