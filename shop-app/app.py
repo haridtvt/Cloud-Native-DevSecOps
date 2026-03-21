@@ -23,7 +23,6 @@ def get_db_connection():
 @app.before_request
 def require_login():
     allowed_routes = ['login', 'register', 'static']
-
     if 'user' not in session and request.endpoint not in allowed_routes and request.endpoint is not None:
         return redirect(url_for('login'))
 
@@ -41,7 +40,6 @@ def register():
         username = request.form['username']
         email = request.form['email']
         password = request.form['password']
-
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
 
         try:
@@ -50,7 +48,7 @@ def register():
                 cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
                 if cursor.fetchone():
                     flash('Username already exists!', 'danger')
-                    return redirect(url_for('register'))
+                    return render_template('register.html')
 
                 cursor.execute("INSERT INTO users (username, email, password) VALUES (%s, %s, %s)",
                                (username, email, hashed_password))
@@ -59,33 +57,10 @@ def register():
             flash('Registration successful! Please login.', 'success')
             return redirect(url_for('login'))
         except Exception as e:
-            flash(f'Error: {str(e)}', 'danger')
+            flash(f'Database Error: {str(e)}', 'danger')
+            return render_template('register.html')
 
     return render_template('register.html')
-
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-
-        try:
-            conn = get_db_connection()
-            with conn.cursor() as cursor:
-                cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
-                user = cursor.fetchone()
-            conn.close()
-
-            if user and bcrypt.check_password_hash(user['password'], password):
-                session['user'] = user['username']
-                return redirect(url_for('dashboard'))
-            else:
-                flash('Invalid password or username!', 'danger')
-        except Exception as e:
-            flash('Database connection error!', 'danger')
-
-    return render_template('login.html')
 
 
 @app.route('/dashboard')
@@ -98,21 +73,37 @@ def dashboard():
     return render_template('dashboard.html', products=db_products)
 
 
-@app.route('/api/buy/<int:product_id>', methods=['POST'])
-def buy_product(product_id):
-    if 'user' not in session: return jsonify({"error": "Unauthorized"}), 401
-
-    conn = get_db_connection()
-    with conn.cursor() as cursor:
-        cursor.execute("UPDATE products SET stock = stock - 1 WHERE id = %s AND stock > 0", (product_id,))
-        conn.commit()
-    conn.close()
-    return redirect(url_for('success'))
+@app.route('/checkout', methods=['GET', 'POST'])
+def checkout():
+    if request.method == 'POST':
+        return redirect(url_for('success'))
+    return render_template('checkout.html')
 
 
 @app.route('/success')
 def success():
     return render_template('success.html')
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        try:
+            conn = get_db_connection()
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+                user = cursor.fetchone()
+            conn.close()
+            if user and bcrypt.check_password_hash(user['password'], password):
+                session['user'] = user['username']
+                return redirect(url_for('dashboard'))
+            else:
+                flash('Invalid password or username!', 'danger')
+        except Exception as e:
+            flash('Database connection error!', 'danger')
+    return render_template('login.html')
 
 
 @app.route('/logout')
