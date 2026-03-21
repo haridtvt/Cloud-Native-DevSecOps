@@ -72,6 +72,8 @@ pipeline {
                         sh 'export BUID_TAG=${BUID_TAG}'
                         sh 'docker pull ${DOCKER_UNAME}/application:${BUID_TAG}'
                         sh 'docker-compose up -d'
+                    }
+                }
             }
         }
     }
