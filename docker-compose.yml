@@ -18,7 +18,7 @@ services:
     environment:
       - DB_HOST=app_db
       - DB_USER=root
-      - DB_PASSWORD=Foobar@123
+      - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=shopdata
     depends_on:
       - app_db
