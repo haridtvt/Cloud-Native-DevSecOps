@@ -24,8 +24,8 @@ pipeline {
             steps {
                 sh 'snyk code test --json | snyk-to-html -o report-code.html || true'
                 sh 'snyk iac test --json | snyk-to-html -o report-iac.html || true'
-                sh 'aws s3 cp ${BUID_TAG}-report-code.html ${S3_URL}'
-                sh 'aws s3 cp ${BUID_TAG}-report-iac.html ${S3_URL}'
+                sh 'aws s3 cp report-code.html ${S3_URL}'
+                sh 'aws s3 cp report-iac.html ${S3_URL}'
                 sh """
                     sonar-scanner \
                       -Dsonar.projectKey=my-devsecops-project \
