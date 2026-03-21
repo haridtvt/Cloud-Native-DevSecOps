@@ -71,6 +71,7 @@ pipeline {
                         sh 'export DOCKER_USER=${DOCKER_USER}'
                         sh 'export BUID_TAG=${BUID_TAG}'
                         sh 'docker pull ${DOCKER_USER}/application:${BUID_TAG}'
+                        sh 'docker-compose down -v || true'
                         sh 'docker-compose up -d'
                     }
                 }
