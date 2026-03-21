@@ -1,7 +1,7 @@
 # stage 1: build stage
 FROM ubuntu:22.04 AS builder
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y python3 python3-pip libmysqlclient-dev gcc
+RUN apt-get update && apt-get install -y python3 python3-pip libmysqlclient-dev gcc pkg-config
 
 WORKDIR /opt/build
 
