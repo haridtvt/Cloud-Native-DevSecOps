@@ -1,4 +1,5 @@
 flask
+flask-bcrypt
 flask-mysqldb
 flask-sqlalchemy
 pymysql
