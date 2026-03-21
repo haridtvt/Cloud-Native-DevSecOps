@@ -45,7 +45,7 @@
 - name: Download templates report
   get_url:
     url: https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl
-    dest: /home/ec2-user/
+    dest: /home/ec2-user/html.tpl
     mode: '0644'
 
 - name: Extract Trivy
