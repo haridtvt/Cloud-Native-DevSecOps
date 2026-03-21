@@ -27,8 +27,9 @@ pipeline {
                 sh 'snyk iac test terraform/ --json | snyk-to-html -o report-terraform.html'
                 sh 'snyk iac test ansible/ --json | snyk-to-html -o report-ansbile.html'
                 sh 'aws s3 cp report-code.html ${S3_URL}'
-                sh 'aws s3 cp report-iac.html ${S3_URL}'
-                sh 'rm -rf report-code.html report-iac.html'
+                sh 'aws s3 cp report-terraform.html ${S3_URL}'
+                sh 'aws s3 cp report-ansbile.html ${S3_URL}'
+                sh 'rm -rf report-code.html report-terraform.html report-ansbile.html'
                 sh """
                     docker run --rm \
                         --network host \
