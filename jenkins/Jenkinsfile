@@ -3,6 +3,7 @@ pipeline {
     environment {
         BUID_TAG="v${BUILD_NUMBER}"
         S3_URL = "s3://devsecops-reports-haridtvt/${JOB_NAME}/${BUILD_TAG}/"
+        DOCKER_USER='haridtvt'
     }
     stages {
         stage('Check out') {
@@ -42,7 +43,6 @@ pipeline {
         stage('Build and Images scan') {
             agent { label 'Security_node' }
             environment {
-                DOCKER_USER='haridtvt'
                 IMAGE_NAME="${DOCKER_USER}/application:${BUID_TAG}"
             }
             steps {
@@ -50,7 +50,7 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'Docker_credentials', usernameVariable: 'DOCKER_UNAME', passwordVariable: 'DOCKER_PASS')]) {
                         sh "echo ${DOCKER_PASS} | docker login -u $DOCKER_UNAME --password-stdin"
                         sh "docker build -t ${IMAGE_NAME} . "
-                        sh "trivy image --format template --template '@/usr/local/share/trivy/templates/html.tpl' -o report-image.html ${IMAGE_NAME} || true"
+                        sh "trivy image --format template --template '@/home/ec2-user/templates/html.tpl' -o report-image.html ${IMAGE_NAME} || true"
                         sh 'aws s3 cp report-image.html ${S3_URL}'
                         sh 'docker push ${IMAGE_NAME}'
                         sh 'docker rmi ${IMAGE_NAME}'
@@ -59,22 +59,23 @@ pipeline {
                 }
             }
         }
-//        stage('Deploy') {
-//            agent {
-//                label 'application_node'
-//            }
-//            steps {
-//                sh 'docker pull ${DOCKER_USER}/application:${BUID_TAG}'
-//                sh 'docker-compose up -d'
-//            }
-//        }
-//        post {
-//            success {
-//                echo 'SUCCESS: Backend deployed successfully.'
-//            }
-//            failure {
-//                echo 'FAILURE: Deployment failed. Please check the logs.'
-//            }
-//        }
+        stage('Deploy') {
+            agent {
+                label 'Application_node'
+            }
+            steps {
+                sh 'export DOCKER_USER=${DOCKER_USER}'
+                sh 'docker pull ${DOCKER_USER}/application:${BUID_TAG}'
+                sh 'docker-compose up -d'
+            }
+        }
+        post {
+            success {
+                echo 'SUCCESS: Deployed successfully.'
+            }
+            failure {
+                echo 'FAILURE: Deployment failed. Please check the logs.'
+            }
+        }
     }
 }
