@@ -5,7 +5,7 @@ services:
     container_name: app_db
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_DATABASE: 'shopdata'
+      MYSQL_DATABASE: 'shop_db'
     volumes:
       - ./shop-app/database.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
@@ -19,7 +19,7 @@ services:
       - DB_HOST=app_db
       - DB_USER=root
       - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=shopdata
+      - DB_NAME=shop_db
     depends_on:
       - app_db
     ports:
